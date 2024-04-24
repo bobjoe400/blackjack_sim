@@ -3,7 +3,7 @@ from bj_strategy import *
 from bj_plays import *
 from bj_util import *
 
-STRATEGY_LIST = []
+STRATEGY_LIST: list[list[str]] = []
 
 DEALER_INFO = [0, [['']], 0, 0, [False], [False], [False]]
 
@@ -15,12 +15,10 @@ def generate_deck(num_decks):
     
     return (deck, stop_point)
 
-
-
 def initialize_felt(deck: list[str], 
-                    player_info_list: list[list[Union[int, list[list[str]] , list[list[Union[int, bool]]], int, int, list[bool], list[bool]]]]
+                    player_info_list: list[PLAYER_INFO_TYPE]
                     ) -> tuple[list[str], 
-                               list[list[Union[int, list[list[str]] , list[list[Union[int, bool]]], int, int, list[bool], list[bool]]]]]:
+                               list[PLAYER_INFO_TYPE]]:
     dealer_cards:list[str] = []
 
     deal_card(deck, dealer_cards)
@@ -83,7 +81,7 @@ def play_hand_dealer(deck: list[str],
     return num_cards_drawn
 
 def play_hand_player(deck: list[str], 
-                     player_info: list[Union[int, list[list[str]] , list[list[Union[int, bool]]], int, int, list[bool], list[bool]]], 
+                     player_info: PLAYER_INFO_TYPE, 
                      dealer_card: str, 
                      player_num: int) -> int:
     print_message("\nPlaying Player", str(player_num) + "'s hand. Starting cards:")
@@ -94,11 +92,12 @@ def play_hand_player(deck: list[str],
     num_cards_drawn = 0
     num_hands = len(player_cards)
     curr_hand_index = 0
-    continue_hand = True
+
 
     while(curr_hand_index < num_hands):
-
-        while continue_hand:
+        continue_current_hand = True
+        
+        while continue_current_hand:
             curr_hand = player_cards[curr_hand_index]
             print_message("Current hand:")
             print_message(curr_hand)
@@ -110,7 +109,7 @@ def play_hand_player(deck: list[str],
                 print_message("Player", player_num, "busts!")
                 break
             
-            strategy = get_suggest_play(curr_hand, player_info, dealer_card, STRATEGY_LIST)
+            strategy = get_suggest_play(curr_hand, player_info[const.PLAYER_NUM_SPLITS_INDEX], dealer_card, STRATEGY_LIST)
 
             executed_play = execute_current_strategy(strategy, curr_hand, deck, player_info, player_num, curr_hand_index, player_cards, num_hands)        
 
@@ -118,7 +117,7 @@ def play_hand_player(deck: list[str],
             num_hands = executed_play[const.EXECUTED_NUM_HANDS_INDEX]
 
             hand_info = current_play[const.CURRENT_PLAY_HAND_NUM_INDEX]
-            continue_hand = current_play[const.CURRENT_PLAY_CONTINUE_HAND_INDEX]
+            continue_current_hand = current_play[const.CURRENT_PLAY_CONTINUE_HAND_INDEX]
 
             num_cards_drawn += (0, PLAYS[strategy][const.PLAYS_CARDS_DRAWN_INDEX])[current_play[const.CURRENT_PLAY_SUCCESS_INDEX]]
 
@@ -128,7 +127,6 @@ def play_hand_player(deck: list[str],
 
             if hand_info[const.HAND_SUM_INDEX] > const.BUST_NUMBER:
                 print_message("Player ", player_num, " busts on hand ", curr_hand_index,"! Here's their final cards for the hand:", sep='')
-                print_message(player_info[const.PLAYER_CARDS_LIST_INDEX])
                 break
 
         curr_hand_index += 1
@@ -224,7 +222,7 @@ def print_hand_results(win_and_lost_list: list[list[int]], active_players_list):
 def run_game(deck, stop_point):
     drawn_cards = 0
 
-    player_info_list: list[list[Union[int, list[list[str]] , list[list[Union[int, bool]]], int, int, list[bool], list[bool]]]] = \
+    player_info_list: list[PLAYER_INFO_TYPE] = \
         [[0, [['']], [[0, False]], const.STARTING_CHIPS, 0, [False], [False]] for i in range(const.NUM_PLAYERS)]
 
     number_of_hands = 0
@@ -280,4 +278,6 @@ def run_game(deck, stop_point):
 if __name__ == "__main__":
     STRATEGY_LIST = load_strategy(const.STRATEGY_FILENAME)
     (deck, stop_point) = generate_deck(const.NUM_DECKS)
+    if(const.OVERRIDE_DECK):
+        deck = const.DECK_OVERRIDE
     result = run_game(deck, stop_point)

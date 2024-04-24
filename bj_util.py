@@ -1,4 +1,14 @@
 import types
+from typing import Union, TypeAlias
+
+PLAYER_INFO_TYPE: TypeAlias = list[Union[int, 
+                                         list[list[str]] , 
+                                         list[list[Union[int, 
+                                                         bool]]], 
+                                         int, 
+                                         int, 
+                                         list[bool], 
+                                         list[bool]]]
 
 const = types.SimpleNamespace()
 
@@ -17,9 +27,12 @@ const.POSSIBLE_CARDS = {'A': 11,
                   'K': 10}
 
 const.BLACKJACKS = [['A', 'K'],
-			  ['A', 'Q'],
-			  ['A', 'J'],
-			  ['A', '10']]
+			        ['A', 'Q'],
+			        ['A', 'J'],
+			        ['A', '10']]
+
+const.OVERRIDE_DECK = True
+const.DECK_OVERRIDE = ['9', 'A', 'K', 'A', 'J', '9', 'A']
 
 const.NUM_SUITS = 4
 const.NUM_CARDS_IN_DECK = len(const.POSSIBLE_CARDS) * const.NUM_SUITS
@@ -88,6 +101,9 @@ const.PLAYS_FUNCTION_NAME_INDEX = 2
 const.SPLIT_DOUBLE_BET_NUM = 3
 const.DOUBLE_BET_NUM = 1
 const.SPLIT_BET_NUM = 1
+
+const.EXECUTED_CURRENT_PLAY_INDEX = 0
+const.EXECUTED_NUM_HANDS_INDEX = 1
 
 const.CURRENT_PLAY_HAND_NUM_INDEX = 0
 const.CURRENT_PLAY_CONTINUE_HAND_INDEX = 1
