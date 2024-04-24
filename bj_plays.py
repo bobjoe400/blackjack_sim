@@ -20,7 +20,7 @@ def player_can_double(player_info, player_num, split: bool = False):
         return False
     return True
 
-def get_hand_info(player_cards: list[str]) -> list[Union[int, bool]]:
+def get_hand_info(player_cards: list[str]) -> HAND_INFO_TYPE:
     sum = 0
     soft = False
     aces_in_hand = 0
@@ -103,7 +103,7 @@ def blackjack(player_cards: list,
               deck: list, 
               player_info: PLAYER_INFO_TYPE, 
               player_num: int = -1,
-              curr_hand_index: int = -1) -> tuple[list[Union[int, bool]], bool, list[list[str]], bool]:
+              curr_hand_index: int = -1) -> tuple[HAND_INFO_TYPE, bool, list[list[str]], bool]:
     print_player_action(player_num, 'blackjack!')
 
     return (get_hand_info(player_cards), False, [], True)
@@ -112,7 +112,7 @@ def hit(player_cards: list,
         deck: list, 
         player_info: PLAYER_INFO_TYPE, 
         player_num: int = -1,
-        curr_hand_index: int = -1) -> tuple[list[Union[int, bool]], bool, list[list[str]], bool]:
+        curr_hand_index: int = -1) -> tuple[HAND_INFO_TYPE, bool, list[list[str]], bool]:
     print_player_action(player_num, 'hits!')
 
     deal_card(deck, player_cards)
@@ -123,7 +123,7 @@ def stand(player_cards: list,
           deck: list, 
           player_info: PLAYER_INFO_TYPE, 
           player_num: int = -1,
-          curr_hand_index: int = -1) -> tuple[list[Union[int, bool]], bool, list[list[str]], bool]:
+          curr_hand_index: int = -1) -> tuple[HAND_INFO_TYPE, bool, list[list[str]], bool]:
     print_player_action(player_num, 'stands!')
 
     return (get_hand_info(player_cards), False, [], True)
@@ -132,7 +132,7 @@ def double(player_cards: list,
            deck: list, 
            player_info: PLAYER_INFO_TYPE, 
            player_num: int = -1,
-           curr_hand_index: int = -1) -> tuple[list[Union[int, bool]], bool, list[list[str]], bool]:
+           curr_hand_index: int = -1) -> tuple[HAND_INFO_TYPE, bool, list[list[str]], bool]:
     if not player_can_double(player_info, player_num):
         print_message("Player", player_num, "cannot afford to double.")
         return (get_hand_info(player_cards), True, [], False)
@@ -149,7 +149,7 @@ def double_hit(player_cards: list,
                deck: list, 
                player_info: PLAYER_INFO_TYPE, 
                player_num: int = -1,
-               curr_hand_index: int = -1) -> tuple[list[Union[int, bool]], bool, list[list[str]], bool]:
+               curr_hand_index: int = -1) -> tuple[HAND_INFO_TYPE, bool, list[list[str]], bool]:
     if const.DOUBLE_ALLOWED:
         current_play = double(player_cards, deck, player_info, player_num, curr_hand_index)
         if current_play[const.CURRENT_PLAY_SUCCESS_INDEX]:
@@ -163,7 +163,7 @@ def double_stand(player_cards: list,
                  deck: list, 
                  player_info: PLAYER_INFO_TYPE, 
                  player_num: int = -1,
-                 curr_hand_index: int = -1) -> tuple[list[Union[int, bool]], bool, list[list[str]], bool]:
+                 curr_hand_index: int = -1) -> tuple[HAND_INFO_TYPE, bool, list[list[str]], bool]:
     if const.DOUBLE_ALLOWED:
         current_play = double(player_cards, deck, player_info, player_num, curr_hand_index)
         if current_play[const.CURRENT_PLAY_SUCCESS_INDEX]:
@@ -177,7 +177,7 @@ def split(player_cards: list,
           deck: list, 
           player_info: PLAYER_INFO_TYPE, 
           player_num: int = -1,
-          curr_hand_index: int = -1) -> tuple[list[Union[int, bool]], bool, list[list[str]], bool]:
+          curr_hand_index: int = -1) -> tuple[HAND_INFO_TYPE, bool, list[list[str]], bool]:
     if player_info[const.PLAYER_CURRENT_CHIPS_INDEX] - const.SPLIT_BET_NUM * const.MIN_BET < 0:
         print_message("Player", player_num, "cannot afford to split")
         return (get_hand_info(player_cards), True, [], False)
@@ -201,7 +201,7 @@ def split_double_hit(player_cards: list,
               deck: list, 
               player_info: PLAYER_INFO_TYPE, 
               player_num: int = -1,
-              curr_hand_index: int = -1) -> tuple[list[Union[int, bool]], bool, list[list[str]], bool]:
+              curr_hand_index: int = -1) -> tuple[HAND_INFO_TYPE, bool, list[list[str]], bool]:
     if const.DOUBLE_AFTER_SPLIT_ALLOWED:
         if not player_can_double(player_info, player_num, True):
             print_message("Player", player_num, "cannot afford to split then double.")
@@ -220,7 +220,7 @@ def surrender(player_cards: list,
               deck: list, 
               player_info: PLAYER_INFO_TYPE, 
               player_num: int = -1,
-              curr_hand_index: int = -1) -> tuple[list[Union[int, bool]], bool, list[list[str]], bool]:
+              curr_hand_index: int = -1) -> tuple[HAND_INFO_TYPE, bool, list[list[str]], bool]:
     print_player_action(player_num, "surrenders!")
 
     return (get_hand_info(player_cards), False, [], True)
@@ -229,7 +229,7 @@ def surrender_hit(player_cards: list,
                   deck: list, 
                   player_info: PLAYER_INFO_TYPE, 
                   player_num: int = -1,
-                  curr_hand_index: int = -1) -> tuple[list[Union[int, bool]], bool, list[list[str]], bool]:
+                  curr_hand_index: int = -1) -> tuple[HAND_INFO_TYPE, bool, list[list[str]], bool]:
     if const.SURRENDER_ALLOWED:
         return surrender(player_cards, deck, player_info, player_num)
     
@@ -241,7 +241,7 @@ def surrender_stand(player_cards: list,
                     deck: list, 
                     player_info: PLAYER_INFO_TYPE, 
                     player_num: int = -1,
-                    curr_hand_index: int = -1) -> tuple[list[Union[int, bool]], bool, list[list[str]], bool]:
+                    curr_hand_index: int = -1) -> tuple[HAND_INFO_TYPE, bool, list[list[str]], bool]:
     if const.SURRENDER_ALLOWED:
         return surrender(player_cards, deck, player_info, player_num)
     
@@ -253,7 +253,7 @@ def surrender_split(player_cards: list,
                     deck: list, 
                     player_info: PLAYER_INFO_TYPE, 
                     player_num: int = -1,
-                    curr_hand_index: int = -1) -> tuple[list[Union[int, bool]], bool, list[list[str]], bool]:
+                    curr_hand_index: int = -1) -> tuple[HAND_INFO_TYPE, bool, list[list[str]], bool]:
     if const.SURRENDER_ALLOWED:
         return surrender(player_cards, deck, player_info, player_num)
     
@@ -266,7 +266,7 @@ PLAYS: list[tuple[Callable[[list[str],
                             PLAYER_INFO_TYPE, 
                             int,
                             int], 
-                           tuple[list[Union[int, bool]], 
+                           tuple[HAND_INFO_TYPE, 
                                  bool, 
                                  list[list[str]],
                                  bool]], 

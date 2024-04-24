@@ -1,10 +1,11 @@
 import types
 from typing import Union, TypeAlias
 
+HAND_INFO_TYPE: TypeAlias = list[Union[int, bool]]
+
 PLAYER_INFO_TYPE: TypeAlias = list[Union[int, 
                                          list[list[str]] , 
-                                         list[list[Union[int, 
-                                                         bool]]], 
+                                         list[HAND_INFO_TYPE], 
                                          int, 
                                          int, 
                                          list[bool], 
@@ -31,7 +32,7 @@ const.BLACKJACKS = [['A', 'K'],
 			        ['A', 'J'],
 			        ['A', '10']]
 
-const.OVERRIDE_DECK = True
+const.OVERRIDE_DECK = False
 const.DECK_OVERRIDE = ['9', 'A', 'K', 'A', 'J', '9', 'A']
 
 const.NUM_SUITS = 4
@@ -39,12 +40,13 @@ const.NUM_CARDS_IN_DECK = len(const.POSSIBLE_CARDS) * const.NUM_SUITS
 
 const.RESERVE_DECKS = 2
 
+const.RUN_UNTIL_DONE = -1
+
 const.NUM_DECKS = 8
 const.NUM_PLAYERS = 1
-const.NUM_HANDS = 30
+const.NUM_HANDS = const.RUN_UNTIL_DONE
 
-const.RUN_UNTIL_DONE = -1
-const.PRINT_MESSAGES = True
+const.PRINT_MESSAGES = False
 
 const.STARTING_CHIPS = 1000
 const.MIN_BET = 10
@@ -114,6 +116,13 @@ const.BLACKJACK_PAYOUT_RATIO = 2.5
 const.REGULAR_PAYOUT_RATIO = 2.0
 const.STANDOFF_PAYOUT_RATIO = 1.0
 const.SURRENDER_PAYOUT_RATIO = 0.5
+const.LOSE_PAYOUT_RATIO = 0.0
+
+const.PAYOUT_RATIO_DESCRIPTIONS = {const.BLACKJACK_PAYOUT_RATIO: "beat the dealer with a blackjack!",
+                                   const.REGULAR_PAYOUT_RATIO: "beat the dealer!", 
+                                   const.STANDOFF_PAYOUT_RATIO: "tied with the dealer.",
+                                   const.SURRENDER_PAYOUT_RATIO: "lost half their chips with a surrender.",
+                                   const.LOSE_PAYOUT_RATIO: "lost to the dealer."}
 
 const.WIN_LOSS_LIST_WINS_INDEX = 0
 const.WIN_LOSS_LIST_LOSSES_INDEX = 1
