@@ -1,22 +1,22 @@
-from constants import *
+from bj_util import *
 from typing import Callable, Union
 
-def deal_card(deck, curr_hand):
+def deal_card(deck: list[str], curr_hand: list[str]):
     curr_hand.append(deck.pop(0))
 
 def make_bet(player_info, player_num, curr_hand_index):
-    print("Player ", player_num, " bets ", const.MIN_BET, " on hand ", curr_hand_index, "!", end=' ', sep='')
+    print_message("Player ", player_num, " bets ", const.MIN_BET, " on hand ", curr_hand_index, "!", end=' ', sep='')
     player_info[const.PLAYER_CURRENT_CHIPS_INDEX] -= const.MIN_BET
     player_info[const.PLAYER_BET_LIST_INDEX][curr_hand_index] += const.MIN_BET
-    print("Player", player_num, "now has", player_info[const.PLAYER_CURRENT_CHIPS_INDEX],"chips left.", end = ' ')
-    print("Their current bet amount is ", player_info[const.PLAYER_BET_LIST_INDEX][curr_hand_index]," chips on hand ", curr_hand_index, ".", sep = '')
+    print_message("Player", player_num, "now has", player_info[const.PLAYER_CURRENT_CHIPS_INDEX],"chips left.", end = ' ')
+    print_message("Their current bet amount is ", player_info[const.PLAYER_BET_LIST_INDEX][curr_hand_index]," chips on hand ", curr_hand_index, ".", sep = '')
 
 def player_can_double(player_info, player_num, split: bool = False):
     if player_info[const.PLAYER_CURRENT_CHIPS_INDEX] - (const.DOUBLE_BET_NUM, const.SPLIT_DOUBLE_BET_NUM)[split] * const.MIN_BET < const.PLAYER_MIN_CHIPS:
         if split:
-            print("Player", player_num, "cannot afford to split then double.")
+            print_message("Player", player_num, "cannot afford to split then double.")
             return False
-        print("Player", player_num, "cannot afford to double.")
+        print_message("Player", player_num, "cannot afford to double.")
         return False
     return True
 
@@ -44,12 +44,60 @@ def get_hand_info(player_cards: list[str]) -> list[Union[int, bool]]:
 
 def print_player_action(player_num, action):
     if(player_num == -1):
-        print("Dealer ", end='')
+        print_message("Dealer ", end='')
 
     else:
-        print("Player " + str(player_num) + " ", end='')
+        print_message("Player " + str(player_num) + " ", end='')
 
-    print(action)
+    print_message(action)
+
+def execute_current_strategy(strategy: int, 
+                             curr_hand: list[str], 
+                             deck: list[str], 
+                             player_info: list[Union[int, list[list[str]] , list[list[Union[int, bool]]], int, int, list[bool], list[bool]]], 
+                             player_num: int, 
+                             curr_hand_index: int, 
+                             player_cards: list[list[str]], 
+                             num_hands: int) -> tuple[tuple[list[int | bool], bool, list[list[str]], bool], int]:
+    current_play = PLAYS[strategy][const.PLAYS_FUNCTION_INDEX](curr_hand, deck, player_info, player_num, curr_hand_index)
+
+    if current_play[const.CURRENT_PLAY_SUCCESS_INDEX]:
+        
+        match strategy:
+            
+            case const.STRATEGY_SPLIT | const.STRATEGY_SPLIT_DOUBLE_HIT | const.STRATEGY_SURRENDER_SPLIT:
+                
+                if not((strategy == const.STRATEGY_SPLIT_DOUBLE_HIT and not const.DOUBLE_AFTER_SPLIT_ALLOWED) or \
+                    (strategy == const.STRATEGY_SURRENDER_SPLIT and not const.SURRENDER_ALLOWED)):
+                    temp_cards = current_play[const.CURRENT_PLAY_SPLIT_CARDS_INDEX]
+                    
+                    player_cards.insert(curr_hand_index, temp_cards[0])
+                    player_cards[curr_hand_index + 1] = temp_cards[1]
+                    
+                    player_info[const.PLAYER_HAND_INFO_LIST_INDEX].insert(curr_hand_index, get_hand_info(temp_cards[0]))
+                    player_info[const.PLAYER_HAND_INFO_LIST_INDEX][curr_hand_index + 1] = [0, False]
+                    
+                    player_info[const.PLAYER_BLACKJACK_LIST_INDEX].insert(curr_hand_index, False)
+                    player_info[const.PLAYER_BLACKJACK_LIST_INDEX][curr_hand_index + 1] = False
+                    
+                    player_info[const.PLAYER_SURRENDER_LIST_INDEX].insert(curr_hand_index, False)
+                    player_info[const.PLAYER_SURRENDER_LIST_INDEX][curr_hand_index + 1] = False
+                    
+                    player_info[const.PLAYER_NUM_SPLITS_INDEX] += 1
+                    
+                    num_hands += 1
+                        
+                if strategy == const.STRATEGY_SURRENDER_SPLIT and not const.SURRENDER_ALLOWED:
+                    player_info[const.PLAYER_SURRENDER_LIST_INDEX][curr_hand_index] = True
+                    
+            case const.STRATEGY_BLACKJACK:
+                player_info[const.PLAYER_BLACKJACK_LIST_INDEX][curr_hand_index] = True
+                
+            case const.STRATEGY_SURRENDER_HIT | const.STRATEGY_SURRENDER_STAND:
+                if const.SURRENDER_ALLOWED:
+                    player_info[const.PLAYER_SURRENDER_LIST_INDEX][curr_hand_index] = True
+    
+    return (current_play, num_hands)
 
 def blackjack(player_cards: list, 
               deck: list, 
@@ -86,7 +134,7 @@ def double(player_cards: list,
            player_num: int = -1,
            curr_hand_index: int = -1) -> tuple[list[Union[int, bool]], bool, list[list[str]], bool]:
     if not player_can_double(player_info, player_num):
-        print("Player", player_num, "cannot afford to double.")
+        print_message("Player", player_num, "cannot afford to double.")
         return (get_hand_info(player_cards), True, [], False)
 
     print_player_action(player_num, 'doubles! Only one card dealt.')
@@ -107,7 +155,7 @@ def double_hit(player_cards: list,
         if current_play[const.CURRENT_PLAY_SUCCESS_INDEX]:
             return current_play
     
-    print("Doubling not allowed.")
+    print_message("Doubling not allowed.")
 
     return hit(player_cards, deck, player_info, player_num)
 
@@ -121,7 +169,7 @@ def double_stand(player_cards: list,
         if current_play[const.CURRENT_PLAY_SUCCESS_INDEX]:
             return current_play
     
-    print("Doubling not allowed.")
+    print_message("Doubling not allowed.")
 
     return stand(player_cards, deck, player_info, player_num)
 
@@ -131,7 +179,7 @@ def split(player_cards: list,
           player_num: int = -1,
           curr_hand_index: int = -1) -> tuple[list[Union[int, bool]], bool, list[list[str]], bool]:
     if player_info[const.PLAYER_CURRENT_CHIPS_INDEX] - const.SPLIT_BET_NUM * const.MIN_BET < 0:
-        print("Player", player_num, "cannot afford to split")
+        print_message("Player", player_num, "cannot afford to split")
         return (get_hand_info(player_cards), True, [], False)
     
     print_player_action(player_num, "splits!")
@@ -156,7 +204,7 @@ def split_double_hit(player_cards: list,
               curr_hand_index: int = -1) -> tuple[list[Union[int, bool]], bool, list[list[str]], bool]:
     if const.DOUBLE_AFTER_SPLIT_ALLOWED:
         if not player_can_double(player_info, player_num, True):
-            print("Player", player_num, "cannot afford to split then double.")
+            print_message("Player", player_num, "cannot afford to split then double.")
             return (get_hand_info(player_cards), True, [], False)
 
         split_cards = split(player_cards, deck, player_info, player_num, curr_hand_index)
@@ -185,7 +233,7 @@ def surrender_hit(player_cards: list,
     if const.SURRENDER_ALLOWED:
         return surrender(player_cards, deck, player_info, player_num)
     
-    print("Surrender not allowed.")
+    print_message("Surrender not allowed.")
 
     return hit(player_cards, deck, player_info, player_num, curr_hand_index)
 
@@ -197,7 +245,7 @@ def surrender_stand(player_cards: list,
     if const.SURRENDER_ALLOWED:
         return surrender(player_cards, deck, player_info, player_num)
     
-    print("Surrender not allowed.")
+    print_message("Surrender not allowed.")
 
     return stand(player_cards, deck, player_info, player_num)
 
@@ -209,7 +257,7 @@ def surrender_split(player_cards: list,
     if const.SURRENDER_ALLOWED:
         return surrender(player_cards, deck, player_info, player_num)
     
-    print("Surrender not allowed.")
+    print_message("Surrender not allowed.")
 
     return split(player_cards, deck, player_info, player_num, curr_hand_index)
 

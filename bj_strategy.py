@@ -1,5 +1,5 @@
 import csv
-from constants import *
+from bj_util import *
 from bj_plays import get_hand_info, PLAYS
 
 def load_strategy(filename):

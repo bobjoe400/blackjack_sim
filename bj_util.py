@@ -31,6 +31,7 @@ const.NUM_PLAYERS = 1
 const.NUM_HANDS = 30
 
 const.RUN_UNTIL_DONE = -1
+const.PRINT_MESSAGES = True
 
 const.STARTING_CHIPS = 1000
 const.MIN_BET = 10
@@ -100,3 +101,7 @@ const.SURRENDER_PAYOUT_RATIO = 0.5
 
 const.WIN_LOSS_LIST_WINS_INDEX = 0
 const.WIN_LOSS_LIST_LOSSES_INDEX = 1
+
+def print_message(*args, **kwargs):
+    if const.PRINT_MESSAGES:
+        print(*args, **kwargs)
